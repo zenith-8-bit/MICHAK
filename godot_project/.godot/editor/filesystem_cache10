@@ -1,0 +1,16 @@
+78098b89c88a74ebe8c20117b8754620
+::res://::1791961023
+::res://assets/::1791960760
+::res://assets/models/::1791960760
+manta.glb::PackedScene::4989400727506651683::1791960760::1791961027::1::::<><><>0<>0<>4877cd34253f8ced2251983568a78a38<>res://.godot/imported/manta.glb-c42c5a95bcd4c5b98398aea55d17a643.scn::
+plane.glb::PackedScene::3028958992960578155::1791960760::1791961028::1::::<><><>0<>0<>a7d9c3935abea4b5830c01e1fcdc559e<>res://.godot/imported/plane.glb-e70368a8b3b1c124d74405ad0c00304c.scn::
+::res://scenes/::1791960760
+main.tscn::PackedScene::-1::1791960760::0::1::::<><><>0<>0<><>::res://scripts/main.gd
+::res://scripts/::1791960760
+cloud_field.gd::GDScript::7810870773688078210::1791960760::0::1::::<>Node3D<><>0<>0<><>::
+main.gd::GDScript::3185449456309774320::1791960760::0::1::::<>Node3D<><>0<>0<><>::
+manta_flock.gd::GDScript::7084628713378497461::1791960760::0::1::::<>Node3D<><>0<>0<><>::
+plane_controller.gd::GDScript::3458002453910452822::1791960760::0::1::::<>Node3D<><>0<>0<><>::
+terrain_generator.gd::GDScript::29864856899820769::1791960760::0::1::::<>Node3D<><>0<>0<><>::
+::res://shaders/::1791960760
+terrain.gdshader::Shader::1014497252566362198::1791960760::0::1::::<><><>0<>0<><>::
