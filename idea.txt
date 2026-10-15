@@ -1,0 +1,26 @@
+game ide ais you are an explorer who is supposed to follor manta flocks and find and share gps coordinate of their dwelling bec wherever they dwell they produce fuel 
+save yourself from rain
+save yourself from mentis aggression sonic confuser and movement to shake 
+track mentis 
+save yourrself from lightning cloud neg charge cloud it messees with sensor
+go near check point occasionally to report finding via groubnd wired network
+controls are mouse and keyboard absed 
+fight against poachers
+cool camer amovements
+scroll should increase and decrease focus
+harsh wind
+in order to escape  from pursuing whales u havve to travel between mountain and shake them off
+no enemie planes only automated enemy ground projectile system that you dont shoot you have to make them non functional / trick them somehow
+like bunch of tasks like put radio interrencce a proper protocol
+likemoving at different speed  go at specific checkpoint sna d release fake signals
+
+also add in sound effects for actions like near mantis main song track shhould change a Bit 
+add in effect for flying near mountains
+going near war zone
+update perlin noise generator for a ui more artistic and fun to explorer
+play with camera movements
+add realistic burids movement logic to the sky whales 
+
+a wealthy sky oil contractor pays you an underground mercenary to find oil deposits in an area 
+
+understand code then  apply
