@@ -24,3 +24,65 @@ add realistic burids movement logic to the sky whales
 a wealthy sky oil contractor pays you an underground mercenary to find oil deposits in an area 
 
 understand code then  apply
+
+add storyline at beginning of game text based 
+
+
+effects to add unique controller motion and key interactions
+for movement cool movement patterns 
+
+hud gives information
+also it should now allow us too go near terrain but terrain area should be very difficult to manuver through due to high amount of wind 
+the plane should also randomly come face to face with widn add some visual effects for wind also update on hud 
+also add a pause screen with generic buttons same aesthetic as current hud
+
+
+gradient around screen absed dangere signal
+twitch chat like info ui that fades away you can toggle in with a key 
+floathing information
+do changes one by one
+
+CONTROLS:
+Controls
+
+Mouse steering: gone (M toggle too).
+S + Space, Immelmann: half loop up, half roll out. You end up reversed and about 65 m higher.
+W + Space, Split-S: half roll, then half loop down. You end up reversed, about 70 m lower and faster. It refuses with “TOO LOW FOR SPLIT-S” if there isn’t enough air under you.
+Tab, Cobra: the nose swings past vertical while you keep flying straight. Speed drops to about 34, then it snaps back.
+Cooldowns and old moves: the combos have a 2.5 s cooldown. Plain Space is still the barrel roll, and double-tap A/D still snap-turns.
+On screen: the combo name flashes on screen, and the key hints show top-right.
+
+Boost and brake animation
+
+Shift: the sonic boom is unchanged. It now adds an afterburner plume and light, a nose-dip punch, speed stretch, and engine shudder.
+Ctrl:
+Airbrake panels swing out and the nose flares up.
+Shock rings collapse inward on the nose.
+Wingtip vapor appears, also during hard pulls and the cobra.
+
+amera and feel
+
+Inertial delay: inputs pass through a short delay and an actuator lag, and the gust torque arrives through the same lag. In calm air a bank takes about 0.23 s to reach 0.4 rad; in heavy wind about 0.77 s. Gusts have to be anticipated.
+Boost: the camera pulls back from about 29 m to 54 m, FOV widens to 82, the far world softens, and a radial blur pulls at the screen edges.
+Ctrl or glide: focus does a quick rack-focus hunt, then locks. A sharpening pulse makes nearby rock and cloud textures pop, and it hits harder close to terrain.
+Edge tint: red for danger, green for a manta within about 300 m. It fades in, holds a couple of seconds, and fades out even if the cause persists. Peak strength is about 60%. If you want it subtler or bolder, change the two multipliers near the end of _push_screen_fx in camera_director.gd.
+Context-Reticle Morphing: When looking toward a checkpoint or a poacher radio-interference target, have the central crosshair subtly morph from a dot into a segmented targeting bracket, confirming that the player's nose is correctly aligned to execute the protocol task (like releasing fake signals).
+
+Minimalist State Transitions: Ensure that edge widgets (like the weather compass and hull status) completely dissolve into near-invisible transparency during calm cruising, fading back in smoothly only when wind speeds spike or environmental hazards are detected.
+Acoustic Song Layering: When tracking Mantas, instead of abruptly changing the music track, cross-fade a warm, breathing acoustic layer or organic harmonic drone into the existing ambient mix the moment you enter their proximity threshold.
+
+War Zone & Mountain Audio Dampening: Flying near automated ground poacher zones should introduce a low-frequency mechanical hum and distant static interference over the radio comms, contrasting sharply with the echoing, wind-swept reverb experienced when skimming close to mountain faces.
+
+Random Wind-Front Visual Cues: Introduce faint, semi-transparent wind-streak particles and sudden audio pressure drops when the plane randomly encounters face-to-speed wind currents, giving players a visual warning split-seconds before the airframe gets pushed off-course.
+
+
+
+fix the cammera blurry effect on boost
+also fix in a moves commbo moves training mode
+also fix in a q based 3d radar vision mode in that mode you can add 1 tracker to 1 stuff 
+make the terrain generator perlin noise thing generate terrain in a fixed setup like a radius basically where ther ewill be stuff like missile battery, emf interference zone , enemy reconnaisance plane route, 
+then finally add in missions
+ship charges fuel by collecting it from air  but you will have to fly through dense air zones  to recharge fuel 
+- moves will be limited by fuel d
+as weapon u only hae timed floating fuel bombs and emf charge , generally disrups the the enemy stung ray or fighter circuits/brain if fighter can hit engine control circuit navigattion etc its  a roll of dice 
+both weapons launched like  a slingshot u can combo emf emmision and bombs

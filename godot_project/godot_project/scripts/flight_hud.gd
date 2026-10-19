@@ -36,12 +36,30 @@ var _warn := 0.0
 var _alpha := 0.62
 var _min_c := 120.0
 var _comfort_c := 210.0
+var _banner := ""
+var _banner_t := 99.0
+var _banner_bad := false
 
 
 func setup(plane_node: Node3D, terrain_node: Node3D, guard_node: Node) -> void:
 	plane = plane_node
 	terrain = terrain_node
 	guard = guard_node
+	if plane.has_signal("maneuver_started"):
+		plane.connect("maneuver_started", _on_maneuver)
+		plane.connect("maneuver_denied", _on_denied)
+
+
+func _on_maneuver(label: String) -> void:
+	_banner = label
+	_banner_t = 0.0
+	_banner_bad = false
+
+
+func _on_denied(reason: String) -> void:
+	_banner = reason
+	_banner_t = 0.0
+	_banner_bad = true
 
 
 func _ready() -> void:
@@ -75,6 +93,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	_hint_t += delta
+	_banner_t += delta
 
 	if not is_instance_valid(plane) or not is_instance_valid(terrain):
 		return
@@ -121,6 +140,7 @@ func _draw_hud() -> void:
 	_draw_flight_panel(vp, s, _alpha * intro)
 	_draw_warning(vp, s, intro)
 	_draw_hints(s, intro)
+	_draw_banner(vp, s)
 
 
 func _draw_flight_panel(vp: Vector2, s: float, a: float) -> void:
@@ -277,6 +297,39 @@ func _draw_hints(s: float, intro: float) -> void:
 			11.0 * s, Color(CREAM, 0.80 * a)
 		)
 		y += 32.0 * s
+
+	# Combo moves, top right.
+	var combos: Array = [
+		[["S", "Space"], "Immelmann"],
+		[["W", "Space"], "Split-S"],
+		[["Tab"], "Cobra"],
+	]
+	var rx: float = _canvas.size.x - 300.0 * s
+	var ry: float = 34.0 * s
+	for row in combos:
+		var kx: float = rx
+		for key in row[0]:
+			kx += _keycap(Vector2(kx, ry), String(key), s, a) + 6.0 * s
+		_text(
+			_label_font, String(row[1]).to_upper(),
+			Vector2(kx + 6.0 * s, ry + 16.0 * s),
+			11.0 * s, Color(CREAM, 0.80 * a)
+		)
+		ry += 32.0 * s
+
+
+## Name of the combo you just flew (or why it was refused), fading in the sky.
+func _draw_banner(vp: Vector2, s: float) -> void:
+	var life := 2.0
+	if _banner == "" or _banner_t > life:
+		return
+	var a: float = smoothstep(0.0, 0.12, _banner_t) * (1.0 - smoothstep(1.1, life, _banner_t))
+	var col: Color = TERRA if _banner_bad else OCHRE.lerp(CREAM, 0.35)
+	var size: float = (30.0 + 5.0 * (1.0 - smoothstep(0.0, 0.25, _banner_t))) * s
+	_text(
+		_label_font, _banner, Vector2(0.0, vp.y * 0.24), size,
+		Color(col, a), HORIZONTAL_ALIGNMENT_CENTER, vp.x
+	)
 
 
 func _keycap(pos: Vector2, text: String, s: float, a: float) -> float:

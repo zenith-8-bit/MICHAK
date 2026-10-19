@@ -11,13 +11,13 @@ extends Node
 ##
 ## Runs after the plane (priority 0) and before the camera (priority 100).
 
-@export var min_clearance: float = 120.0       # hard floor above ground (m)
-@export var comfort_clearance: float = 210.0   # evasion starts below this (m)
-@export var lookahead_seconds: float = 3.0
-@export var max_climb_rate: float = 170.0      # strongest upward push (m/s)
-@export var response: float = 4.0              # how fast the push ramps
-@export var pitch_assist_deg: float = 40.0     # nose-up assist (deg/s)
-@export var wing_half_span: float = 45.0       # lateral sample offset (m)
+@export var min_clearance: float = 22.0       # hard floor above ground (m)
+@export var comfort_clearance: float = 60.0   # evasion starts below this (m)
+@export var lookahead_seconds: float = 1.5
+@export var max_climb_rate: float = 70.0      # strongest upward push (m/s)
+@export var response: float = 2.5              # how fast the push ramps
+@export var pitch_assist_deg: float = 14.0     # nose-up assist (deg/s)
+@export var wing_half_span: float = 30.0       # lateral sample offset (m)
 
 ## 0..1, how hard the guard is working. Use it for HUD warnings.
 var urgency: float = 0.0

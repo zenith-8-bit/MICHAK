@@ -7,11 +7,13 @@ const FlockScript := preload("res://scripts/manta_flock.gd")
 const CloudScript := preload("res://scripts/cloud_field.gd")
 const GuardScript := preload("res://scripts/terrain_guard.gd")
 const HudScript := preload("res://scripts/flight_hud.gd")
+const CameraScript := preload("res://scripts/camera_director.gd")
 
 var terrain: Node3D
 var plane: Node3D
 var cam: Camera3D
 var hud: CanvasLayer
+var camera_fx: Node
 var music_player: AudioStreamPlayer
 var music_volume_db: float = -12.0
 var wind_player: AudioStreamPlayer
@@ -94,6 +96,12 @@ func _ready() -> void:
 	hud.name = "FlightHUD"
 	add_child(hud)
 	hud.call("setup", plane, terrain, guard)
+
+	# Spring chase camera, focal breathing and the red/green edge tint.
+	camera_fx = CameraScript.new()
+	camera_fx.name = "CameraDirector"
+	add_child(camera_fx)
+	camera_fx.call("setup", cam, plane, flock, guard, terrain)
 
 	_mask_subjects()
 	_setup_post_fx()
@@ -368,26 +376,7 @@ func _process(delta: float) -> void:
 	_update_wind(delta)
 
 	terrain.call("update_chunks", plane.global_position)
-
-	if is_instance_valid(cam):
-		var target: Vector3 = plane.global_transform * Vector3(0, 4.5, 15)
-
-		var blend := 1.0 - exp(-5.0 * delta)
-		cam.global_position = cam.global_position.lerp(target, blend)
-
-		# Boost feel: widen the FOV a little as the plane speeds up.
-		var boost: float = float(plane.get("boost_amount"))
-		cam.fov = lerpf(cam.fov, 70.0 + 12.0 * boost, 1.0 - exp(-6.0 * delta))
-
-		var forward: Vector3 = -plane.global_transform.basis.z
-		var up := Vector3.UP.lerp(
-			plane.global_transform.basis.y, 0.25
-		).normalized()
-
-		cam.look_at(
-			plane.global_position + forward * 30.0 + Vector3(0, 2, 0),
-			up
-		)
+	# The chase camera lives in camera_director.gd (priority 101, runs after this).
 
 
 func _update_wind(delta: float) -> void:
@@ -408,3 +397,8 @@ func _update_wind(delta: float) -> void:
 
 	var blend := 1.0 - exp(-3.5 * delta)
 	wind_player.volume_db = lerpf(wind_player.volume_db, target_db, blend)
+
+	# Pitch rides the throttle: higher in boost, lower when the airbrake is out.
+	var boost: float = float(plane.get("boost_amount"))
+	var brake: float = float(plane.get("brake_amount"))
+	wind_player.pitch_scale = lerpf(wind_player.pitch_scale, 1.0 + 0.22 * boost - 0.15 * brake, blend)

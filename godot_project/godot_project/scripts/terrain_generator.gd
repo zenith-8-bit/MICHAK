@@ -21,6 +21,7 @@ extends Node3D
 @export_range(0.0, 1.0, 0.01) var ridge_strength: float = 0.50
 @export_range(0.0, 1.0, 0.01) var river_strength: float = 1.0
 @export_range(0.0, 0.25, 0.005) var detail_strength: float = 0.03
+@export_range(0.0, 1.0, 0.01) var spire_strength: float = 0.55
 
 @export_group("Streaming")
 @export_range(1, 8, 1) var chunks_per_frame: int = 1
@@ -30,6 +31,8 @@ const ROCK := Color(0.17, 0.09, 0.13)        # sepia / violet-brown shadow
 const ROCK_WARM := Color(0.74, 0.33, 0.17)   # terracotta
 const ROCK_COOL := Color(0.38, 0.30, 0.45)   # dusty lavender-gray
 const OCHRE := Color(0.84, 0.60, 0.30)       # mustard ochre
+const SALT := Color(0.55, 0.42, 0.62)        # violet salt flats
+const MINERAL := Color(0.22, 0.46, 0.50)     # teal mineral basins
 const BEIGE := Color(0.86, 0.72, 0.54)       # dusty beige
 
 var _base: FastNoiseLite = FastNoiseLite.new()
@@ -40,6 +43,12 @@ var _river: FastNoiseLite = FastNoiseLite.new()
 var _warp_x: FastNoiseLite = FastNoiseLite.new()
 var _warp_z: FastNoiseLite = FastNoiseLite.new()
 var _tint: FastNoiseLite = FastNoiseLite.new()
+var _biome: FastNoiseLite = FastNoiseLite.new()
+var _spire: FastNoiseLite = FastNoiseLite.new()
+var _oil: FastNoiseLite = FastNoiseLite.new()
+
+## World positions (y = ground) of the oil seeps the contractor wants surveyed.
+var oil_sites: Array[Vector3] = []
 
 var _gradient: Gradient = Gradient.new()
 var _material: ShaderMaterial = ShaderMaterial.new()
@@ -55,6 +64,7 @@ func _ready() -> void:
 	_setup_noise()
 	_setup_gradient()
 	_setup_material()
+	oil_sites = find_oil_sites(5, 500.0, 2800.0, 650.0)
 
 
 ## Direction pointing TOWARD the sun, in world space.
@@ -93,6 +103,9 @@ func _setup_noise() -> void:
 	_configure_noise(_warp_x, seed_value + 303, 0.0011, 3, 0.5)
 	_configure_noise(_warp_z, seed_value + 404, 0.0011, 3, 0.5)
 	_configure_noise(_tint, seed_value + 505, 0.0040, 3, 0.5)
+	_configure_noise(_biome, seed_value + 909, 0.0009, 2, 0.5)
+	_configure_noise(_spire, seed_value + 1111, 0.0105, 3, 0.55)
+	_configure_noise(_oil, seed_value + 1313, 0.0021, 2, 0.5)
 
 
 ## Rotate into diagonal space: x = along the top-left -> bottom-right
@@ -199,6 +212,44 @@ func _river_d(x: float, z: float) -> float:
 # Terrain height
 # ---------------------------------------------------------
 
+func oil_noise(x: float, z: float) -> float:
+	return _oil.get_noise_2d(x, z) * 0.5 + 0.5
+
+
+## Picks the best low-lying, well-separated seep locations in an annulus
+## around the origin. Deterministic for a given seed.
+func find_oil_sites(count: int, min_r: float, max_r: float, min_sep: float) -> Array[Vector3]:
+	var cands: Array[Dictionary] = []
+	var step: float = 70.0
+	var n: int = int(max_r / step)
+	for iz in range(-n, n + 1):
+		for ix in range(-n, n + 1):
+			var x: float = float(ix) * step
+			var z: float = float(iz) * step
+			var r: float = Vector2(x, z).length()
+			if r < min_r or r > max_r:
+				continue
+			var h: float = height_at(x, z) / maxf(height_scale, 0.001)
+			if h > 0.34:
+				continue
+			cands.append({"pos": Vector3(x, 0.0, z), "score": oil_noise(x, z) - h * 0.4})
+	cands.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return float(a["score"]) > float(b["score"]))
+
+	var out: Array[Vector3] = []
+	for c in cands:
+		var p: Vector3 = c["pos"]
+		var ok: bool = true
+		for q in out:
+			if Vector2(p.x - q.x, p.z - q.z).length() < min_sep:
+				ok = false
+				break
+		if ok:
+			out.append(Vector3(p.x, height_at(p.x, p.z), p.z))
+			if out.size() >= count:
+				break
+	return out
+
+
 func height_at(x: float, z: float) -> float:
 	var warp_amount: float = 95.0
 
@@ -229,6 +280,11 @@ func height_at(x: float, z: float) -> float:
 	var h: float = 0.07 + 0.28 * broad
 	h += mesa_strength * 0.40 * plateau
 	h += 0.10 * upper
+
+	# Needle spires: sparse hoodoos rising off the mesa tops.
+	var spire_raw: float = _spire.get_noise_2d(wx, wz)
+	var spire: float = pow(smoothstep(0.50, 0.88, spire_raw), 2.0)
+	h += spire * spire_strength * 0.30 * (0.35 + 0.65 * plateau)
 	h += ridge * ridge_strength * 0.20 * ridge_mask
 
 	# Side gullies.
@@ -305,6 +361,21 @@ func _color_at(
 	# Low ground sits in cool plum shade.
 	var low: float = 1.0 - smoothstep(0.0, 0.22, t)
 	color = color.lerp(ROCK_COOL.darkened(0.45), low * 0.30)
+
+	# Regional biomes: violet salt flats and teal mineral basins.
+	var biome: float = _biome.get_noise_2d(x, z) * 0.5 + 0.5
+	color = color.lerp(SALT, smoothstep(0.60, 0.82, biome) * 0.42 * (1.0 - t * 0.5))
+	color = color.lerp(MINERAL, (1.0 - smoothstep(0.14, 0.34, biome)) * 0.38 * (1.0 - t))
+
+	# Oil seeps: black pools with an iridescent sheen.
+	var oil: float = smoothstep(0.68, 0.82, oil_noise(x, z)) * (1.0 - smoothstep(0.10, 0.34, t))
+	for site in oil_sites:
+		oil = maxf(oil, 1.0 - smoothstep(35.0, 95.0, Vector2(x - site.x, z - site.z).length()))
+	if oil > 0.01:
+		var hue: float = fposmod(0.52 + oil_noise(x * 3.0, z * 3.0) * 1.2 + x * 0.002, 1.0)
+		var sheen: Color = Color.from_hsv(hue, 0.55, 0.42)
+		var pool: Color = Color(0.04, 0.05, 0.07).lerp(sheen, 0.35)
+		color = color.lerp(pool, clampf(oil, 0.0, 1.0) * 0.9)
 
 	# River: damp, darker banks, then a water mask in alpha.
 	var d: float = _river_d(x, z)
